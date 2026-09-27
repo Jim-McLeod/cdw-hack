@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canberra Data Walk</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <h1 id="walk-title">Canberra Data Walk</h1>
+    <p id="walk-intro">Loading places&hellip;</p>
+    <ul id="places-list"></ul>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    loadWalk().then(function (walk) {
+      document.getElementById('walk-title').textContent = walk.title;
+      document.getElementById('walk-intro').textContent =
+        'Choose a place to learn more. ' + walk.places.length + ' stops on this walk.';
+
+      var list = document.getElementById('places-list');
+      walk.places.forEach(function (place) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = 'place.html?id=' + encodeURIComponent(place.id);
+        a.textContent = place.name;
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>

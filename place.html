@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Place - Canberra Data Walk</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <p><a href="index.html">&larr; Back to all places</a></p>
+
+    <article id="place">
+      <p>Loading place&hellip;</p>
+    </article>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var placeId = params.get('id');
+
+    loadWalk().then(function (walk) {
+      var place = walk.places.find(function (p) { return p.id === placeId; });
+      var article = document.getElementById('place');
+
+      if (!place) {
+        article.innerHTML = '<h1>Place not found</h1><p>No place matches id "' + placeId + '".</p>';
+        return;
+      }
+
+      var nextPlace = walk.places.find(function (p) { return p.id === place.nextPlaceId; });
+      var mapUrl = 'https://www.openstreetmap.org/?mlat=' + place.latitude +
+                   '&mlon=' + place.longitude + '#map=18/' + place.latitude + '/' + place.longitude;
+
+      article.innerHTML =
+        '<h1>' + place.name + '</h1>' +
+        '<p><strong>Theme:</strong> ' + place.theme + '</p>' +
+        '<h2>Story</h2>' +
+        '<p>' + place.story + '</p>' +
+        '<h2>Data prompt</h2>' +
+        '<p>' + place.dataPrompt + '</p>' +
+        '<h2>Accessibility</h2>' +
+        '<p>' + place.accessibility + '</p>' +
+        '<h2>Location</h2>' +
+        '<p>' + place.latitude + ', ' + place.longitude +
+        ' &mdash; <a href="' + mapUrl + '" target="_blank" rel="noopener">View on map</a></p>' +
+        '<h2>Source</h2>' +
+        '<p><a href="' + place.sourceUrl + '" target="_blank" rel="noopener">' + place.sourceUrl + '</a></p>' +
+        (nextPlace
+          ? '<p><a href="place.html?id=' + encodeURIComponent(nextPlace.id) + '">Next stop: ' + nextPlace.name + ' &rarr;</a></p>'
+          : '');
+    });
+  </script>
+</body>
+</html>

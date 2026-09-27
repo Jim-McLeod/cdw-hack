@@ -1,0 +1,9 @@
+{
+  "mimeTypes": {
+    ".json": "application/json"
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/data/*", "*.{css,js,json,png,jpg,svg,ico}"]
+  }
+}
