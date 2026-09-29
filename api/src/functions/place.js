@@ -20,9 +20,11 @@ app.http('place', {
       const pool = await getPool();
       const req = pool.request();
       let query;
+      const params = {};
 
       if (tag) {
         req.input('tag', sql.VarChar(100), tag);
+        params.tag = tag;
         query = `
           SELECT p.Id AS id, p.Slug AS slug, p.Name AS name,
                  p.Latitude AS latitude, p.Longitude AS longitude,
@@ -34,6 +36,7 @@ app.http('place', {
           WHERE t.TagId = @tag`;
       } else if (slug) {
         req.input('slug', sql.VarChar(100), slug);
+        params.slug = slug;
         query = `
           SELECT Id AS id, Slug AS slug, Name AS name,
                  Latitude AS latitude, Longitude AS longitude,
@@ -47,6 +50,7 @@ app.http('place', {
           return { status: 400, jsonBody: { error: 'id must be an integer' } };
         }
         req.input('id', sql.Int, parsedId);
+        params.id = parsedId;
         query = `
           SELECT Id AS id, Slug AS slug, Name AS name,
                  Latitude AS latitude, Longitude AS longitude,
@@ -57,15 +61,17 @@ app.http('place', {
       }
 
       const result = await req.query(query);
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-Debug-SQL': encodeURIComponent(query),
+        'X-Debug-Params': encodeURIComponent(JSON.stringify(params))
+      };
+
       if (result.recordset.length === 0) {
-        return { status: 404, jsonBody: { error: 'Place not found' } };
+        return { status: 404, headers: headers, jsonBody: { error: 'Place not found' } };
       }
 
-      return {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-        jsonBody: result.recordset[0]
-      };
+      return { status: 200, headers: headers, jsonBody: result.recordset[0] };
     } catch (err) {
       context.error('place query failed', err);
       return { status: 500, jsonBody: { error: 'Failed to load place' } };

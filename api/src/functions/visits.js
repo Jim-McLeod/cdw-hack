@@ -30,20 +30,31 @@ app.http('visits', {
       return { status: 400, jsonBody: { error: 'message must be <= 500 characters' } };
     }
 
+    const query = `
+      INSERT INTO dbo.Visits (PlaceId, VisitorName, Message)
+      OUTPUT INSERTED.Id AS id, INSERTED.VisitedAt AS visitedAt
+      VALUES (@placeId, @visitorName, @message)`;
+    const params = {
+      placeId: placeId,
+      visitorName: visitorName,
+      message: message.length ? message : null
+    };
+
     try {
       const pool = await getPool();
       const result = await pool.request()
-        .input('placeId', sql.Int, placeId)
-        .input('visitorName', sql.VarChar(100), visitorName)
-        .input('message', sql.VarChar(500), message.length ? message : null)
-        .query(`
-          INSERT INTO dbo.Visits (PlaceId, VisitorName, Message)
-          OUTPUT INSERTED.Id AS id, INSERTED.VisitedAt AS visitedAt
-          VALUES (@placeId, @visitorName, @message)`);
+        .input('placeId', sql.Int, params.placeId)
+        .input('visitorName', sql.VarChar(100), params.visitorName)
+        .input('message', sql.VarChar(500), params.message)
+        .query(query);
 
       return {
         status: 201,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Debug-SQL': encodeURIComponent(query),
+          'X-Debug-Params': encodeURIComponent(JSON.stringify(params))
+        },
         jsonBody: result.recordset[0]
       };
     } catch (err) {
