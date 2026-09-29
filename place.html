@@ -43,6 +43,9 @@
     fetchJson(apiUrl).then(function (place) {
       currentPlaceId = place.id;
 
+      // Silent audit log: fire-and-forget, no UI feedback.
+      autoLogVisit(place.id);
+
       var mapUrl = 'https://www.openstreetmap.org/?mlat=' + place.latitude +
                    '&mlon=' + place.longitude +
                    '#map=18/' + place.latitude + '/' + place.longitude;
@@ -152,6 +155,21 @@
         }, 1500);
       }).catch(function () {
         button.textContent = 'Copy failed';
+      });
+    }
+
+    function autoLogVisit(placeId) {
+      var name = getVisitorName() || 'Unknown';
+      fetch('/api/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          placeId: placeId,
+          visitorName: name,
+          message: 'Automatic'
+        })
+      }).catch(function () {
+        // Auditing is best-effort - never let a failed log break the page.
       });
     }
   </script>
