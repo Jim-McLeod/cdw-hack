@@ -74,7 +74,7 @@ app.http('place', {
       return { status: 200, headers: headers, jsonBody: result.recordset[0] };
     } catch (err) {
       context.error('place query failed', err);
-      return { status: 500, jsonBody: { error: 'Failed to load place' } };
+      return { status: 500, jsonBody: { error: 'Failed to load place', detail: err.message } };
     }
   }
 });

@@ -59,7 +59,7 @@ app.http('visits', {
       };
     } catch (err) {
       context.error('visit insert failed', err);
-      return { status: 500, jsonBody: { error: 'Failed to log visit' } };
+      return { status: 500, jsonBody: { error: 'Failed to log visit', detail: err.message } };
     }
   }
 });

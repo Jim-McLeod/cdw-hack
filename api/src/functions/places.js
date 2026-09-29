@@ -24,7 +24,7 @@ app.http('places', {
       };
     } catch (err) {
       context.error('places query failed', err);
-      return { status: 500, jsonBody: { error: 'Failed to load places' } };
+      return { status: 500, jsonBody: { error: 'Failed to load places', detail: err.message } };
     }
   }
 });

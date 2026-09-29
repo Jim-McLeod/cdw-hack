@@ -18,7 +18,13 @@ async function fetchJson(url, options) {
   }
 
   if (!response.ok) {
-    throw new Error('Request failed (' + response.status + ')');
+    let detail = '';
+    try {
+      const body = await response.clone().json();
+      if (body && body.detail) detail = ' - ' + body.detail;
+      else if (body && body.error) detail = ' - ' + body.error;
+    } catch (e) { /* body wasn't JSON */ }
+    throw new Error('Request failed (' + response.status + ')' + detail);
   }
   return response.json();
 }
