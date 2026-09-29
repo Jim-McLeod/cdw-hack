@@ -27,6 +27,11 @@
       </form>
       <p id="visit-status" role="status"></p>
     </section>
+
+    <section id="visit-history-section" hidden>
+      <h2>Recent visits</h2>
+      <ol id="visit-history"></ol>
+    </section>
   </main>
 
   <script src="app.js"></script>
@@ -49,6 +54,11 @@
         : '';
 
       document.getElementById('place').innerHTML =
+        '<div class="place-slug">' +
+          '<span class="slug-label">Place ID:</span> ' +
+          '<code class="slug-value">' + place.slug + '</code> ' +
+          '<button type="button" class="copy-btn" onclick="copyToClipboard(\'' + place.slug + '\', this)">Copy</button>' +
+        '</div>' +
         '<h1>' + place.name + '</h1>' +
         '<p><strong>Theme:</strong> ' + place.theme + '</p>' +
         '<h2>Story</h2><p>' + place.story + '</p>' +
@@ -62,6 +72,11 @@
       // Reveal the form and pre-fill the name from the cookie.
       document.getElementById('visit-form-section').hidden = false;
       document.getElementById('visitor-name').value = getVisitorName();
+
+      // Hidden flag: ?showVisits reveals the visit history for this place.
+      if (params.has('showVisits')) {
+        loadVisitHistory(place.id);
+      }
     }).catch(function (err) {
       document.getElementById('place').innerHTML =
         '<h1>Place not found</h1><p>' + err.message + '</p>';
@@ -100,6 +115,51 @@
         status.textContent = 'Could not log visit: ' + err.message;
       });
     });
+
+    function loadVisitHistory(placeId) {
+      var section = document.getElementById('visit-history-section');
+      var list = document.getElementById('visit-history');
+      section.hidden = false;
+      list.innerHTML = '<li>Loading&hellip;</li>';
+
+      fetchJson('/api/visits?placeId=' + placeId).then(function (visits) {
+        if (!visits.length) {
+          list.innerHTML = '<li>No visits logged yet.</li>';
+          return;
+        }
+        list.innerHTML = '';
+        visits.forEach(function (visit) {
+          var li = document.createElement('li');
+          var when = new Date(visit.visitedAt).toLocaleString();
+          var msg = visit.message ? ' &mdash; "' + escapeHtml(visit.message) + '"' : '';
+          li.innerHTML = '<strong>' + escapeHtml(visit.visitorName) + '</strong> ' +
+                         '<span class="visit-time">(' + when + ')</span>' + msg;
+          list.appendChild(li);
+        });
+      }).catch(function (err) {
+        list.innerHTML = '<li>Could not load visits: ' + escapeHtml(err.message) + '</li>';
+      });
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.textContent = text == null ? '' : String(text);
+      return div.innerHTML;
+    }
+
+    function copyToClipboard(text, button) {
+      navigator.clipboard.writeText(text).then(function () {
+        var original = button.textContent;
+        button.textContent = 'Copied!';
+        button.disabled = true;
+        setTimeout(function () {
+          button.textContent = original;
+          button.disabled = false;
+        }, 1500);
+      }).catch(function () {
+        button.textContent = 'Copy failed';
+      });
+    }
   </script>
 </body>
 </html>

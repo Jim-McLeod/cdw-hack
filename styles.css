@@ -67,3 +67,44 @@ button {
 button:hover { background: #2a5580; }
 
 #visit-status { margin-top: 0.75rem; font-style: italic; color: #2a6f4e; }
+
+#visit-history { padding-left: 1.25rem; }
+#visit-history li { margin: 0.4rem 0; }
+.visit-time { color: #666; font-size: 0.9em; }
+
+.place-slug {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0.75rem;
+  background: #eef4fa;
+  border: 1px solid #cfe0ef;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.slug-label { color: #555; }
+
+.slug-value {
+  font-family: Consolas, "Courier New", monospace;
+  background: #fff;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid #d5d1c7;
+}
+
+.copy-btn {
+  font: inherit;
+  padding: 0.25rem 0.6rem;
+  background: #1c3d5a;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.copy-btn:hover:not(:disabled) { background: #2a5580; }
+.copy-btn:disabled { background: #2a6f4e; cursor: default; }
