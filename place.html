@@ -8,8 +8,6 @@
 </head>
 <body>
   <main>
-    <p><a href="index.html">&larr; Back to all places</a></p>
-
     <article id="place">
       <p>Loading place&hellip;</p>
     </article>
@@ -49,10 +47,6 @@
                    '&mlon=' + place.longitude +
                    '#map=18/' + place.latitude + '/' + place.longitude;
 
-      var nextLink = place.nextPlaceSlug
-        ? '<p><a href="place.html?slug=' + encodeURIComponent(place.nextPlaceSlug) + '">Next stop &rarr;</a></p>'
-        : '';
-
       document.getElementById('place').innerHTML =
         '<div class="place-slug">' +
           '<span class="slug-label">Place ID:</span> ' +
@@ -67,7 +61,7 @@
         '<h2>Location</h2><p>' + place.latitude + ', ' + place.longitude +
         ' &mdash; <a href="' + mapUrl + '" target="_blank" rel="noopener">View on map</a></p>' +
         '<h2>Source</h2><p><a href="' + place.sourceUrl + '" target="_blank" rel="noopener">' +
-        place.sourceUrl + '</a></p>' + nextLink;
+        place.sourceUrl + '</a></p>';
 
       // Reveal the form and pre-fill the name from the cookie.
       document.getElementById('visit-form-section').hidden = false;
