@@ -1,21 +1,26 @@
-// Fetches the Canberra Data Walk JSON once and reuses it.
-// Beginners: change DATA_URL to point at your own Azure Blob Storage URL when you're ready.
-//var DATA_URL = 'data/canberra-data-walk.json';
-//var DATA_URL = 'https://canberradataweek.com/assets/canberra-data-walk.json';
-var DATA_URL = 'https://cdwhack001.blob.core.windows.net/data/canberra-data-walk.json';
+// Shared helpers for the Canberra Data Walk sample app.
 
-
-
-var walkPromise = null;
-
-function loadWalk() {
-  if (!walkPromise) {
-    walkPromise = fetch(DATA_URL).then(function (response) {
-      if (!response.ok) {
-        throw new Error('Could not load data (' + response.status + ')');
-      }
-      return response.json();
-    });
+// Fetch JSON from any URL and throw on non-2xx responses.
+async function fetchJson(url, options) {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error('Request failed (' + response.status + ')');
   }
-  return walkPromise;
+  return response.json();
+}
+
+// --- Visitor name cookie ---------------------------------------------------
+// A cookie remembers the visitor's name for a year, so they only enter it once.
+
+function getVisitorName() {
+  const match = document.cookie.match(/(?:^|; )visitorName=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function setVisitorName(name) {
+  const oneYear = 365 * 24 * 60 * 60;
+  document.cookie =
+    'visitorName=' + encodeURIComponent(name) +
+    '; max-age=' + oneYear +
+    '; path=/; SameSite=Lax';
 }

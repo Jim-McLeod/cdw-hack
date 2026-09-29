@@ -13,43 +13,92 @@
     <article id="place">
       <p>Loading place&hellip;</p>
     </article>
+
+    <section id="visit-form-section" hidden>
+      <h2>Log your visit</h2>
+      <form id="visit-form">
+        <label for="visitor-name">Your name</label>
+        <input id="visitor-name" name="visitorName" type="text" maxlength="100" required />
+
+        <label for="visit-message">A short message (optional)</label>
+        <textarea id="visit-message" name="message" maxlength="500" rows="3"></textarea>
+
+        <button type="submit">Log visit</button>
+      </form>
+      <p id="visit-status" role="status"></p>
+    </section>
   </main>
 
   <script src="app.js"></script>
   <script>
+    // Accept ?tag=... (NFC), ?slug=... (list page), or ?id=... (numeric).
     var params = new URLSearchParams(window.location.search);
-    var placeId = params.get('id');
+    var apiUrl = '/api/place?' + params.toString();
 
-    loadWalk().then(function (walk) {
-      var place = walk.places.find(function (p) { return p.id === placeId; });
-      var article = document.getElementById('place');
+    var currentPlaceId = null;
 
-      if (!place) {
-        article.innerHTML = '<h1>Place not found</h1><p>No place matches id "' + placeId + '".</p>';
+    fetchJson(apiUrl).then(function (place) {
+      currentPlaceId = place.id;
+
+      var mapUrl = 'https://www.openstreetmap.org/?mlat=' + place.latitude +
+                   '&mlon=' + place.longitude +
+                   '#map=18/' + place.latitude + '/' + place.longitude;
+
+      var nextLink = place.nextPlaceSlug
+        ? '<p><a href="place.html?slug=' + encodeURIComponent(place.nextPlaceSlug) + '">Next stop &rarr;</a></p>'
+        : '';
+
+      document.getElementById('place').innerHTML =
+        '<h1>' + place.name + '</h1>' +
+        '<p><strong>Theme:</strong> ' + place.theme + '</p>' +
+        '<h2>Story</h2><p>' + place.story + '</p>' +
+        '<h2>Data prompt</h2><p>' + place.dataPrompt + '</p>' +
+        '<h2>Accessibility</h2><p>' + place.accessibility + '</p>' +
+        '<h2>Location</h2><p>' + place.latitude + ', ' + place.longitude +
+        ' &mdash; <a href="' + mapUrl + '" target="_blank" rel="noopener">View on map</a></p>' +
+        '<h2>Source</h2><p><a href="' + place.sourceUrl + '" target="_blank" rel="noopener">' +
+        place.sourceUrl + '</a></p>' + nextLink;
+
+      // Reveal the form and pre-fill the name from the cookie.
+      document.getElementById('visit-form-section').hidden = false;
+      document.getElementById('visitor-name').value = getVisitorName();
+    }).catch(function (err) {
+      document.getElementById('place').innerHTML =
+        '<h1>Place not found</h1><p>' + err.message + '</p>';
+    });
+
+    document.getElementById('visit-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      var nameInput = document.getElementById('visitor-name');
+      var messageInput = document.getElementById('visit-message');
+      var status = document.getElementById('visit-status');
+
+      var name = nameInput.value.trim();
+      var message = messageInput.value.trim();
+
+      if (!name || !currentPlaceId) {
+        status.textContent = 'Please enter your name.';
         return;
       }
 
-      var nextPlace = walk.places.find(function (p) { return p.id === place.nextPlaceId; });
-      var mapUrl = 'https://www.openstreetmap.org/?mlat=' + place.latitude +
-                   '&mlon=' + place.longitude + '#map=18/' + place.latitude + '/' + place.longitude;
+      setVisitorName(name);
+      status.textContent = 'Logging visit...';
 
-      article.innerHTML =
-        '<h1>' + place.name + '</h1>' +
-        '<p><strong>Theme:</strong> ' + place.theme + '</p>' +
-        '<h2>Story</h2>' +
-        '<p>' + place.story + '</p>' +
-        '<h2>Data prompt</h2>' +
-        '<p>' + place.dataPrompt + '</p>' +
-        '<h2>Accessibility</h2>' +
-        '<p>' + place.accessibility + '</p>' +
-        '<h2>Location</h2>' +
-        '<p>' + place.latitude + ', ' + place.longitude +
-        ' &mdash; <a href="' + mapUrl + '" target="_blank" rel="noopener">View on map</a></p>' +
-        '<h2>Source</h2>' +
-        '<p><a href="' + place.sourceUrl + '" target="_blank" rel="noopener">' + place.sourceUrl + '</a></p>' +
-        (nextPlace
-          ? '<p><a href="place.html?id=' + encodeURIComponent(nextPlace.id) + '">Next stop: ' + nextPlace.name + ' &rarr;</a></p>'
-          : '');
+      fetchJson('/api/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          placeId: currentPlaceId,
+          visitorName: name,
+          message: message
+        })
+      }).then(function (result) {
+        status.textContent = 'Thanks ' + name + ' - visit logged at ' + result.visitedAt + '.';
+        messageInput.value = '';
+      }).catch(function (err) {
+        status.textContent = 'Could not log visit: ' + err.message;
+      });
     });
   </script>
 </body>

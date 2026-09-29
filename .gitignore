@@ -2,3 +2,7 @@ node_modules/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Local Functions dev settings - contains the SQL password, must not be committed
+api/local.settings.json
+api/node_modules/

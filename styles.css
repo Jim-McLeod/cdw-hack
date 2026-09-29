@@ -12,29 +12,13 @@ main {
   padding: 1.5rem;
 }
 
-h1 {
-  margin-top: 0;
-  color: #1c3d5a;
-}
+h1 { margin-top: 0; color: #1c3d5a; }
+h2 { margin-top: 1.5rem; color: #2a6f4e; font-size: 1.15rem; }
 
-h2 {
-  margin-top: 1.5rem;
-  color: #2a6f4e;
-  font-size: 1.15rem;
-}
+ul { list-style: none; padding: 0; }
+li { margin: 0.5rem 0; }
 
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  margin: 0.5rem 0;
-}
-
-a {
-  color: #1c3d5a;
-}
+a { color: #1c3d5a; }
 
 li a {
   display: block;
@@ -45,13 +29,41 @@ li a {
   text-decoration: none;
 }
 
-li a:hover {
-  background: #eef4fa;
-}
+li a:hover { background: #eef4fa; }
 
-article {
+article, section {
   background: #fff;
   padding: 1.25rem 1.5rem;
   border: 1px solid #e0ddd6;
   border-radius: 6px;
+  margin-top: 1rem;
 }
+
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+label { font-weight: 600; }
+
+input, textarea {
+  font: inherit;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #c9c6bd;
+  border-radius: 4px;
+}
+
+button {
+  font: inherit;
+  padding: 0.6rem 1rem;
+  background: #1c3d5a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  justify-self: start;
+}
+
+button:hover { background: #2a5580; }
+
+#visit-status { margin-top: 0.75rem; font-style: italic; color: #2a6f4e; }
